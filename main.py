@@ -1,7 +1,8 @@
 import point
 import pandas as pd
+import numpy as np
 from datetime import datetime
-
+import matplotlib.pyplot as plt
 
 # Parse points from data and measurements files
 def parse_points():
@@ -79,16 +80,38 @@ def calculate_pointed_area_statistic(pointed_area):
             p.calculate_statistics()
 
 
+# create interpolated and non-interpolated heat maps
+def create_heat_map(data_matrix, title=""):
+    # create interpolated heat map
+    plt.subplot(1, 2, 1)  # 1 строка, 2 столбца, первый график
+    plt.imshow(data_matrix, cmap='plasma', interpolation='bicubic')
+    plt.colorbar()
+    # create non-interpolated heat map
+    plt.subplot(1, 2, 2)  # 1 строка, 2 столбца, второй график
+    plt.imshow(data_matrix, cmap='plasma')
+
+    # put values into heat map
+    for i in range(data_matrix.shape[0]):
+        for j in range(data_matrix.shape[1]):
+            plt.annotate(f"{data_matrix[i, j]:.2f}", (j, i), color='black', ha='center', va='center')
+    plt.colorbar()
+    plt.show()
+
+
 def main():
-    pointed_area = fill_two_dimensional_array(parse_points(), 5, 5)
-    calculate_pointed_area_statistic(pointed_area)
+    pointed_area = fill_two_dimensional_array(parse_points(), 5, 5)  # define data for pointed area
+    calculate_pointed_area_statistic(pointed_area)  # calculate statistic
     for row in pointed_area:
         for p in row:
             p.print()
-    average_matrix = get_parameter_data_matrix(pointed_area, 0, "cpsdata", "average")
+    average_matrix = get_parameter_data_matrix(pointed_area, 3, "cpsdata", "average")
     for row in average_matrix:
         for p in row:
             print(p)
+    create_heat_map(np.array(average_matrix), "Average radiation level in CPS")
+
+
+
 
 
 main()
