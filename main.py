@@ -63,8 +63,32 @@ def fill_two_dimensional_array(simple_array, rows, columns):
     return res
 
 
-area_points = fill_two_dimensional_array(parse_points(), 5, 5)
-for row in area_points:
-    for p in row:
-        p.print()
+# return matrix with each point`s concrete attribute
+def get_parameter_data_matrix(pointed_area, level, radiation_data_type, attribute_name):
+    res = [[0]*len(pointed_area) for _ in range(len(pointed_area[0]))]
+    for i, row in enumerate(pointed_area):
+        for j, point in enumerate(row):
+            res[i][j] = getattr(getattr(point, radiation_data_type)[level], attribute_name)
+    return res
 
+
+# calculate statistic for each point in area
+def calculate_pointed_area_statistic(pointed_area):
+    for row in pointed_area:
+        for p in row:
+            p.calculate_statistics()
+
+
+def main():
+    pointed_area = fill_two_dimensional_array(parse_points(), 5, 5)
+    calculate_pointed_area_statistic(pointed_area)
+    for row in pointed_area:
+        for p in row:
+            p.print()
+    average_matrix = get_parameter_data_matrix(pointed_area, 0, "cpsdata", "average")
+    for row in average_matrix:
+        for p in row:
+            print(p)
+
+
+main()

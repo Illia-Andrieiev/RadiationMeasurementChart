@@ -33,7 +33,7 @@ class Point:
         self.Svdata = []
         self.nomer = nomer
 
-    def countParams(self):
+    def calculate_statistics(self):
         for level in self.cpsdata:
             level.calculate_statistics()
         for level in self.Svdata:
