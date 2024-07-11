@@ -2,52 +2,69 @@ import point
 import pandas as pd
 from datetime import datetime
 
-# Replace 'your_file.csv' with your actual file path
-infile = 'data.csv'
 
-# Define a date parser function
-dateparse = lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+# Parse points from data and measurements files
+def parse_points():
+    # Replace 'your_file.csv' with your actual file path
+    infile = 'data.csv'
 
-# Read the CSV file and parse the 'DateTime' column
-df = pd.read_csv(infile, parse_dates=['DateTime'], date_parser=dateparse)
+    # Define a date parser function
+    dateparse = lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
 
-# Now you can work with the parsed datetime values in the DataFrame 'df'
-print(df.head(2))
-time_measure_file = 'timeMeasurements.csv'
+    # Read the CSV file and parse the 'DateTime' column
+    df = pd.read_csv(infile, parse_dates=['DateTime'], date_parser=dateparse)
 
-# Define a date parser function
-timeparse = lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+    # Now you can work with the parsed datetime values in the DataFrame 'df'
+    time_measure_file = 'timeMeasurements.csv'
 
-# Read the CSV file and parse the 'DateTime' column
-time_measurements = pd.read_csv(time_measure_file, parse_dates=['Time'], date_parser=timeparse)
-print(time_measurements.head(2))
-point_nomer = 1
-height = 0
-current_index = 0
-points = []
-cur_point = point.Point(point_nomer)
-for index, row in time_measurements.iterrows():
-    cur_level_cps = point.LevelData()
-    cur_level_Sv = point.LevelData()
-    if height == 5:
-        height = 0
-        point_nomer += 1
-        points.append(cur_point)
-        cur_point = point.Point(point_nomer)
-    start_time = row['Time']
-    end_time = start_time + pd.Timedelta(seconds=30)
-    # Find the relevant rows in 'df' based on time intervals
-    relevant_rows = df[(df['DateTime'] >= start_time) & (df['DateTime'] < end_time)]
+    # Define a date parser function
+    timeparse = lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
 
-    for index, row in relevant_rows.iterrows():
-        cur_level_cps.data.append(row['CPS'])
-        cur_level_Sv.data.append(row['DoseRate'])
-        cur_level_Sv.height = height * 0.5
-        cur_level_cps.height = height * 0.5
-        current_index += 1
-    cur_point.Svdata.append(cur_level_Sv)
-    cur_point.cpsdata.append(cur_level_cps)
-    height += 1
+    # Read the CSV file and parse the 'DateTime' column
+    time_measurements = pd.read_csv(time_measure_file, parse_dates=['Time'], date_parser=timeparse)
+    point_nomer = 1  # start count points from 1
+    level = 0  # start height
+    points = []  # result points
+    cur_point = point.Point(point_nomer)  # current point
+    for index, row in time_measurements.iterrows():  # for each time measurement write level date into one point
+        cur_level_cps = point.LevelData()  # current level radiation in cps
+        cur_level_Sv = point.LevelData()  # current level radiation in Sievert
+        if level == 5:  # each point have 5 measurement levels (starts with 0). Add point and set default value
+            level = 0
+            point_nomer += 1
+            points.append(cur_point)
+            cur_point = point.Point(point_nomer)
 
-for p in points:
-    p.print()
+        start_time = row['Time']  # start time for level measurement
+        end_time = start_time + pd.Timedelta(seconds=30)
+        # Find the relevant rows in 'df' based on time intervals
+        relevant_rows = df[(df['DateTime'] >= start_time) & (df['DateTime'] < end_time)]
+
+        for i, relevant_row in relevant_rows.iterrows():  # fill point level data
+            cur_level_cps.data.append(relevant_row['CPS'])
+            cur_level_Sv.data.append(relevant_row['DoseRate'])
+            cur_level_Sv.height = level * 0.5
+            cur_level_cps.height = level * 0.5
+        cur_point.Svdata.append(cur_level_Sv)
+        cur_point.cpsdata.append(cur_level_cps)
+        level += 1  # increase level
+
+    points.append(cur_point)  # add last point
+    return points
+
+
+# fill two_dimensional_array using simple array in decline columns order
+def fill_two_dimensional_array(simple_array, rows, columns):
+    res = [[None] * columns for _ in range(rows)]
+    for index, elem in enumerate(simple_array):
+        row_index = int(index / columns)
+        column_index = columns - 1 - index % columns
+        res[row_index][column_index] = simple_array[index]
+    return res
+
+
+area_points = fill_two_dimensional_array(parse_points(), 5, 5)
+for row in area_points:
+    for p in row:
+        p.print()
+
