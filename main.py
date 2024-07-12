@@ -111,16 +111,39 @@ def save_plot(plot, path):
 
 
 def save_param(pointed_area, radiation_data_type, attribute_name):
+    """
+    Saves heat maps for a given parameter.
+
+    Parameters:
+    pointed_area (str): The specified area for analysis.
+    radiation_data_type (str): The type of radiation data.
+    attribute_name (str): The name of the attribute for analysis.
+
+    """
     for i in range(5):
+        # Get the data matrix for the current level
         data_matrix = get_parameter_data_matrix(pointed_area, i, radiation_data_type, attribute_name)
+        # Create the heat map
         plot = create_heat_map(np.array(data_matrix), False, attribute_name + " " + radiation_data_type +
-                                 " " + str(i * 0.5) + " M")
-        save_plot(plot, "plots/" + radiation_data_type + "/" + attribute_name + "/" + "level" + str(i)+".png")
+                               " " + str(i * 0.5) + " M")
+        # Save the heat map to a file
+        save_plot(plot, "plots/" + radiation_data_type + "/" + attribute_name + "/" + "level" + str(i) + ".png")
+        # Close the current plot to free up memory
         plt.close()
 
 
 def save_radiation_datatype(pointed_area, radiation_data_type, attribute_names):
+    """
+    Saves heat maps for all attributes of a given radiation data type.
+
+    Parameters:
+    pointed_area (str): The specified area for analysis.
+    radiation_data_type (str): The type of radiation data.
+    attribute_names (list): A list of attribute names for analysis.
+
+    """
     for attribute in attribute_names:
+        # Save heat maps for each attribute
         save_param(pointed_area, radiation_data_type, attribute)
 
 
