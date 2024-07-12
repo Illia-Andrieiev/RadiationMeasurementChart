@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 import matplotlib.pyplot as plt
 
+
 # Parse points from data and measurements files
 def parse_points():
     # Replace 'your_file.csv' with your actual file path
@@ -48,7 +49,7 @@ def parse_points():
             cur_level_Sv.height = level * 0.5
             cur_level_cps.height = level * 0.5
         cur_point.Svdata.append(cur_level_Sv)
-        cur_point.cpsdata.append(cur_level_cps)
+        cur_point.CPSdata.append(cur_level_cps)
         level += 1  # increase level
 
     points.append(cur_point)  # add last point
@@ -109,23 +110,26 @@ def save_plot(plot, path):
     plot.savefig(path, dpi=300, bbox_inches='tight')
 
 
+def save_param(pointed_area, radiation_data_type, attribute_name):
+    for i in range(5):
+        data_matrix = get_parameter_data_matrix(pointed_area, i, radiation_data_type, attribute_name)
+        plot = create_heat_map(np.array(data_matrix), False, attribute_name + " " + radiation_data_type +
+                                 " " + str(i * 0.5) + " M")
+        save_plot(plot, "plots/" + radiation_data_type + "/" + attribute_name + "/" + "level" + str(i)+".png")
+        plt.close()
+
+
+def save_radiation_datatype(pointed_area, radiation_data_type, attribute_names):
+    for attribute in attribute_names:
+        save_param(pointed_area, radiation_data_type, attribute)
+
+
 def main():
     pointed_area = fill_two_dimensional_array(parse_points(), 5, 5)  # define data for pointed area
     calculate_pointed_area_statistic(pointed_area)  # calculate statistic
-    for row in pointed_area:
-        for p in row:
-            p.print()
-    average_matrix = get_parameter_data_matrix(pointed_area, 4, "Svdata", "max")
-    for row in average_matrix:
-        for p in row:
-            print(p)
-    map = create_heat_map(np.array(average_matrix),False, "Average CPS")
-    save_plot(map, 'plots/heatmap.png')
-    # res = [[None] * 5 for _ in range(5)]
-    # for i, row in enumerate(pointed_area):
-    #     for j, p in enumerate(row):
-    #         res[i][j] = p.nomer
-    # create_heat_map(np.array(res), "nomers")
+    statistics_names = ["moda", "min", "max", "average", "dispersion"]  # names of statistic parameters
+    save_radiation_datatype(pointed_area, "Svdata", statistics_names)  # save Sievert data heatmaps
+    save_radiation_datatype(pointed_area, "CPSdata", statistics_names)  # save CPS data heatmaps
 
 
 main()

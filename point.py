@@ -29,12 +29,12 @@ class LevelData:
 
 class Point:
     def __init__(self, nomer):
-        self.cpsdata = []
+        self.CPSdata = []
         self.Svdata = []
         self.nomer = nomer
 
     def calculate_statistics(self):
-        for level in self.cpsdata:
+        for level in self.CPSdata:
             level.calculate_statistics()
         for level in self.Svdata:
             level.calculate_statistics()
@@ -42,7 +42,7 @@ class Point:
     def print(self):
         print(f"Point {self.nomer}:")
         print("CPS Data:")
-        for i, level in enumerate(self.cpsdata):
+        for i, level in enumerate(self.CPSdata):
             print(f"  Level {i + 1}:")
             level.print()
         print("SV Data:")
