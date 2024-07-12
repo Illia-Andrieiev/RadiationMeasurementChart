@@ -2,7 +2,6 @@ import point
 import pandas as pd
 import numpy as np
 import os
-from datetime import datetime
 import matplotlib.pyplot as plt
 
 
@@ -11,20 +10,18 @@ def parse_points():
     # Replace 'your_file.csv' with your actual file path
     infile = 'data.csv'
 
-    # Define a date parser function
-    dateparse = lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+    # Define the date format
+    date_format = '%Y-%m-%d %H:%M:%S'
 
     # Read the CSV file and parse the 'DateTime' column
-    df = pd.read_csv(infile, parse_dates=['DateTime'], date_parser=dateparse)
+    df = pd.read_csv(infile, parse_dates=['DateTime'], date_format=date_format)
 
     # Now you can work with the parsed datetime values in the DataFrame 'df'
     time_measure_file = 'timeMeasurements.csv'
 
-    # Define a date parser function
-    timeparse = lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+    # Read the time measurements file and parse the 'Time' column
+    time_measurements = pd.read_csv(time_measure_file, parse_dates=['Time'], date_format=date_format)
 
-    # Read the CSV file and parse the 'DateTime' column
-    time_measurements = pd.read_csv(time_measure_file, parse_dates=['Time'], date_parser=timeparse)
     point_nomer = 1  # start count points from 1
     level = 0  # start height
     points = []  # result points
