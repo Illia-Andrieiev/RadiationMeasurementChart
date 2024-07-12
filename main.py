@@ -1,6 +1,7 @@
 import point
 import pandas as pd
 import numpy as np
+import os
 from datetime import datetime
 import matplotlib.pyplot as plt
 
@@ -81,21 +82,31 @@ def calculate_pointed_area_statistic(pointed_area):
 
 
 # create interpolated and non-interpolated heat maps
-def create_heat_map(data_matrix, title=""):
-    # create interpolated heat map
-    plt.subplot(1, 2, 1)  # 1 строка, 2 столбца, первый график
-    plt.imshow(data_matrix, cmap='plasma', interpolation='bicubic')
-    plt.colorbar()
-    # create non-interpolated heat map
-    plt.subplot(1, 2, 2)  # 1 строка, 2 столбца, второй график
-    plt.imshow(data_matrix, cmap='plasma')
+def create_heat_map(data_matrix, is_show, title=""):
+    fig, axes = plt.subplots(1, 2, figsize=(18, 6))  # 1 row, 2 columns, area 18x6 inches
 
-    # put values into heat map
+    # create interpolated heat map
+    axes[0].imshow(data_matrix, cmap='plasma', interpolation='bicubic')
+    axes[0].set_title(title)
+    fig.colorbar(axes[0].images[0], ax=axes[0])
+
+    # create non-interpolated heat map
+    im = axes[1].imshow(data_matrix, cmap='plasma')
+    # write values on heat map
     for i in range(data_matrix.shape[0]):
         for j in range(data_matrix.shape[1]):
-            plt.annotate(f"{data_matrix[i, j]:.2f}", (j, i), color='black', ha='center', va='center')
-    plt.colorbar()
-    plt.show()
+            axes[1].annotate(f"{data_matrix[i, j]:.2f}", (j, i), color='black', ha='center', va='center')
+    axes[1].set_title(title)  # set title
+    fig.colorbar(im, ax=axes[1])
+    if is_show:
+        plt.show()
+    return plt
+
+
+# save plot as image in path. Path should have file name
+def save_plot(plot, path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    plot.savefig(path, dpi=300, bbox_inches='tight')
 
 
 def main():
@@ -104,14 +115,17 @@ def main():
     for row in pointed_area:
         for p in row:
             p.print()
-    average_matrix = get_parameter_data_matrix(pointed_area, 3, "cpsdata", "average")
+    average_matrix = get_parameter_data_matrix(pointed_area, 4, "Svdata", "max")
     for row in average_matrix:
         for p in row:
             print(p)
-    create_heat_map(np.array(average_matrix), "Average radiation level in CPS")
-
-
-
+    map = create_heat_map(np.array(average_matrix),False, "Average CPS")
+    save_plot(map, 'plots/heatmap.png')
+    # res = [[None] * 5 for _ in range(5)]
+    # for i, row in enumerate(pointed_area):
+    #     for j, p in enumerate(row):
+    #         res[i][j] = p.nomer
+    # create_heat_map(np.array(res), "nomers")
 
 
 main()
